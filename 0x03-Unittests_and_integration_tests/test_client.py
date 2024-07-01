@@ -47,3 +47,31 @@ class TestGithubOrgClient(unittest.TestCase):
                 GithubOrgClient("google")._public_repos_url,
                 "https://api.github.com/orgs/google/repos",
                 )
+
+    @patch("client.get_json")
+    def test_public_repos(self, mock_get_json):
+        """Test GithubOrgClient.public_repos method"""
+        mock_payload = [
+            {"name": "repo1", "license": {"key": "mit"}},
+            {"name": "repo2", "license": {"key": "apache-2.0"}},
+            {"name": "repo3", "license": {"key": "mit"}},
+        ]
+        mock_get_json.return_value = mock_payload
+        with patch.object(GithubOrgClient, '_public_repos_url',
+                          new_callable=PropertyMock) as \
+                mock_public_repos_url:
+            mock_public_repos_url.return_value = \
+                    "https://api.github.com/orgs/google/repos"
+            client = GithubOrgClient("google")
+            repos = client.public_repos()
+
+            expected_repos = ["repo1", "repo2", "repo3"]
+            self.assertEqual(repos, expected_repos)
+            mock_public_repos_url.assert_called_once()
+            mock_get_json.assert_called_once_with(
+                    "https://api.github.com/orgs/google/repos",
+                    )
+
+
+if __name__ == "__main__":
+    unittest.main()
