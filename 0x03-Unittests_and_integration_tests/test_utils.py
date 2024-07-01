@@ -17,7 +17,7 @@ should not be longer than 2 lines."""
 import unittest
 from unittest.mock import patch, Mock
 from parameterized import parameterized
-from utils import access_nested_map, get_json
+from utils import access_nested_map, get_json, memoize
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -32,8 +32,8 @@ class TestAccessNestedMap(unittest.TestCase):
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
     @parameterized.expand([
-        ({}, ("a",)),
-        ({"a": 1}, ("a", "b")),
+        ({}, ("a",), KeyError),
+        ({"a": 1}, ("a", "b"), KeyError),
     ])
     def test_access_nested_map_exception(self, nested_map, path, expected):
         """check that a KeyError is raised when the
@@ -58,6 +58,30 @@ class TestGetJson(unittest.TestCase):
             response = get_json(test_url)
 
             self.assertEqual(response, expected)
+
+
+class TestMemoize(unittest.TestCase):
+    """ test the memoize function"""
+
+    def test_memoize(self):
+        """ testing
+        """
+
+        class TestClass:
+            """ Test Class for wrapping with memoize """
+
+            def a_method(self):
+                return 42
+
+            @memoize
+            def a_property(self):
+                return self.a_method()
+
+        with patch.object(TestClass, 'a_method') as mock:
+            test_class = TestClass()
+            test_class.a_property()
+            test_class.a_property()
+            mock.assert_called_once()
 
 
 if __name__ == "__main__":
