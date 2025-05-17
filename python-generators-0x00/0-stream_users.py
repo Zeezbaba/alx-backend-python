@@ -1,4 +1,5 @@
 import mysql.connector
+
 def stream_users():
     """function that uses a generator to fetch rows
     one by one from the user_data table. You must use
@@ -8,10 +9,10 @@ def stream_users():
         connection = mysql.connector.connect(
             host='localhost',
             user='root',
-            password='pwd123',
+            password='zeezboss',
             database='ALX_prodev'
         )
-        cursor = connection.cursor(Dictionary=true)
+        cursor = connection.cursor(dictionary=True)
         cursor.execute("SELECT user_id, name, email, age FROM user_data")
 
         for row in cursor:
