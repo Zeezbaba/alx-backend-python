@@ -12,7 +12,7 @@ def stream_users_in_batches(batch_size):
     cursor = db_connection.cursor(dictionary=True)
 
     cursor.execute("SELECT COUNT(*) FROM user_data")
-    total = cursor.fetchone("COUNT(*)")
+    total = cursor.fetchone()["COUNT(*)"]
 
     for offset in range(0, total, batch_size):
         cursor.execute(
@@ -29,7 +29,7 @@ def batch_processing(batch_size):
     for batch in stream_users_in_batches(batch_size):
         for user in batch:
             age = user['age']
-            if isinstance(age, decimal):
+            if isinstance(age, Decimal):
                 age = int(age)
             if age > 25:
                 print(user)
