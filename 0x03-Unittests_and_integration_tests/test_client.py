@@ -114,7 +114,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher = patch("requests.get", side_effect=get_payload)
         cls.get_patcher.start()
 
-    def test_public_repos_integration(self) -> None:
+    def test_public_repos(self) -> None:
         """Testing
         """
         self.assertEqual(
