@@ -11,7 +11,7 @@ for following inputs:
     nested_map={"a": {"b": 2}}, path=("a",)
     nested_map={"a": {"b": 2}}, path=("a", "b")
 For each of these inputs, test with assertEqual that the
-function returns the expected result.The body of the test method
+function returns the test_payload result.The body of the test method
 should not be longer than 2 lines."""
 
 import unittest
@@ -27,21 +27,22 @@ class TestAccessNestedMap(unittest.TestCase):
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2),
     ])
-    def test_access_nested_map(self, nested_map, path, expected):
+    def test_access_nested_map(self, nested_map, path, test_payload):
         """test the access nested map method"""
-        self.assertEqual(access_nested_map(nested_map, path), expected)
+        self.assertEqual(access_nested_map(nested_map, path), test_payload)
 
     @parameterized.expand([
         ({}, ("a",), KeyError),
         ({"a": 1}, ("a", "b"), KeyError),
     ])
-    def test_access_nested_map_exception(self, nested_map, path, expected):
+    def test_access_nested_map_exception(self, nested_map, path, test_payload):
         """check that a KeyError is raised when the
         access_nested_map function is called with these parameters
         """
-        with self.assertRaises(expected) as context:
+        with self.assertRaises(KeyError) as context:
             access_nested_map(nested_map, path)
-        # self.assertEqual(f"KeyError('{expected}')", repr(err.exception))
+        self.assertEqual(str(context.exception), test_payload)
+        # self.assertEqual(f"KeyError('{test_payload}')", repr(err.exception))
 
 
 class TestGetJson(unittest.TestCase):
@@ -50,14 +51,16 @@ class TestGetJson(unittest.TestCase):
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False}),
     ])
-    def test_get_json(self, test_url, expected):
+    def test_get_json(self, test_url, test_payload):
         """test that utils.get_json returns the expected result"""
-        mock_response = Mock()
-        mock_response.json.return_value = expected
-        with patch('requests.get', return_value=mock_response):
-            response = get_json(test_url)
+        with patch('utils.requests.get') as mock_get:
+            mock_response = Mock()
+            mock_response.json.return_value = test_payload
+            mock_get.return_value = mock_response
 
-            self.assertEqual(response, expected)
+            response = get_json(test_url)
+            mock_get.assert_called_ones_with(test_url)
+            self.assertEqual(response, test_payload)
 
 
 class TestMemoize(unittest.TestCase):
@@ -77,10 +80,16 @@ class TestMemoize(unittest.TestCase):
             def a_property(self):
                 return self.a_method()
 
-        with patch.object(TestClass, 'a_method') as mock:
+        with patch.object(TestClass, 'a_method', return_value=42) as mock:
             test_class = TestClass()
-            test_class.a_property()
-            test_class.a_property()
+            response1 = test_class.a_property()
+            response2 = test_class.a_property()
+
+            #assert return value are correct
+            self.assertEqual(response1, 42)
+            self.assertEqual(response2, 42)
+
+            # Assert a_method was called only once due to memoization
             mock.assert_called_once()
 
 
