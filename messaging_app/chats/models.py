@@ -50,10 +50,11 @@ class Conversation(models.Model):
 
 class Message(models.Model):
     """ message model """
-    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='messages')
+    message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
-    content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages')
+    message_body = models.TextField()
+    sent_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"From {self.sender.username} in conversation {self.conversation.id}"
+        return f"Message {self.message_id} from {self.sender.email}"
