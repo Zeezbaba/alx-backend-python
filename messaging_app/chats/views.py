@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from .models import User, Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
 
-class ConversationViewset(viewsets.ModelViewSet):
+class ConversationViewSet(viewsets.ModelViewSet):
     """ List and create conversation """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
@@ -24,7 +24,7 @@ class ConversationViewset(viewsets.ModelViewSet):
         serializer = self.get_serializer(conversation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-class MessageViewset(viewsets.ModelViewSet):
+class MessageViewSet(viewsets.ModelViewSet):
     """ List and send messages in a conversation """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
