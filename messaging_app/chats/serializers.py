@@ -16,6 +16,11 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_number',
         ]
 
+    def validate_email(self, value):
+        if "@example.com" in value:
+            raise serializers.ValidationError("Emails from example.com are not allowed")
+        return value
+
 class MessageSerializer(serializers.ModelSerializer):
     sender_email = serializers.SerializerMethodField()
     class Meta:
