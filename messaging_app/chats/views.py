@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from .models import User, Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
@@ -8,6 +8,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """ List and create conversation """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['participants_email']
 
     def create(self, request, *args, **kwargs):
         # Gets participants IDs
