@@ -9,9 +9,12 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """ List and create conversation """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    permission_classes = [IsParticipantOfConversation]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     filter_backends = [filters.SearchFilter]
-    search_fields = ['participants_email']
+    search_fields = ['participants__email']
+
+    def query_set(self):
+        return Conversation.objects.filter(participants=self.request.user)
 
     def create(self, request, *args, **kwargs):
         # Gets participants IDs
@@ -20,9 +23,18 @@ class ConversationViewSet(viewsets.ModelViewSet):
             return Response({"error": "Particants  must be a list of user ID"},
                             status=status.HTTP_400_BAD_REQUEST)
 
+        try:
+            participants = User.objects.filter(user_id__in=participant_ids)
+            if request.user not in participants:
+                # Automatically add the user to participants
+                participants = list(participants) + [request.user]
+        except Exception:
+            return Response({"error": "Invalid participants lists"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         # create the conversation
         conversation = Conversation.objects.create()
-        conversation.participants.set(User.objects.filter(user_id__in=participant_ids))
+        conversation.participants.set(participants)
         conversation.save()
 
         serializer = self.get_serializer(conversation)
@@ -32,7 +44,10 @@ class MessageViewSet(viewsets.ModelViewSet):
     """ List and send messages in a conversation """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [IsParticipantOfConversation]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+
+    def query_set(self):
+        return Message.objects.filter(conversations__participants=self.request.user)
 
     def create(self, request, *args, **kwargs):
         # Gets required fields
@@ -50,6 +65,10 @@ class MessageViewSet(viewsets.ModelViewSet):
         except (Conversation.DoesNotExist, User.DoesNotExist):
             return Response({"error": "Invalid conversation or sender ID"},
             status=status.HTTP_400_BAD_REQUEST)
+
+        if sender not in conversation.participants.all():
+            return Response({"error": "Forbidden"},
+            status=status.HTTP_403_FORBIDDEN)
 
         message = Message.objects.create(
             conversation=conversation,

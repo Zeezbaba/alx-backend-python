@@ -20,4 +20,6 @@ class IsParticipantOfConversation(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # allow access only if the user is a participant of the converversation
-        return request.user in obj.conversation.participants.all()
+        if request.method in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+            return request.user in obj.conversation.participants.all()
+        retutn False
