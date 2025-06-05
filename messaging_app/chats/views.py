@@ -3,11 +3,13 @@ from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from .models import User, Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer
+from .permissions import IsParticipantOfConversation
 
 class ConversationViewSet(viewsets.ModelViewSet):
     """ List and create conversation """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
+    permission_classes = [IsParticipantOfConversation]
     filter_backends = [filters.SearchFilter]
     search_fields = ['participants_email']
 
@@ -30,6 +32,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     """ List and send messages in a conversation """
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    permission_classes = [IsParticipantOfConversation]
 
     def create(self, request, *args, **kwargs):
         # Gets required fields
