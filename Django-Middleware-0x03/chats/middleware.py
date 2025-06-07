@@ -83,3 +83,26 @@ class OffensiveLanguageMiddleware:
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+class RolepermissionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Check if user is authenticated and request path is protected
+        protected_paths = ['/messages/create/', '/admin-only-action/']
+        if request.path in protected_paths:
+            user = request.user
+
+            if not user.is_authenticated:
+                return JsonResponse({
+                    'error': 'Authentication required'}, status=401)
+
+            # Check for role: only admin or moderator is allowed
+            user_role = getattr(user, 'role', None)
+            if user_role not in ['admin', 'moderator']:
+                return JsonResponse({
+                    'error': 'Forbidden: Insuffecient Permissions'
+                }, status=403)
+                
+        return self.get_response(request)
