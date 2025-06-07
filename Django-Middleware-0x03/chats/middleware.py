@@ -1,6 +1,7 @@
 import logging
+import time
 from datetime import datetime
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
@@ -36,10 +37,49 @@ class RestrictAccessByTimeMiddleware:
         # Get current server hour
         current_hour = datetime.now().hour
 
-        # Allow access only between 18:00(6pm) and 21:00(9pm)
-        if current_hour < 18 or current_hour >= 21:
-            return HttpResponseForbidden("Access to the chat is only allowed between 6pm and 9pm")
+        # Allow access only between 09:00(9am) and 18:00(6pm)
+        if current_hour < 8 or current_hour >= 18:
+            return HttpResponseForbidden("Access to the chat is only allowed between 9am and 6pm")
 
         # Continue the process
         response = self.get_response(request)
         return response
+
+class OffensiveLanguageMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # Dictionary to store IP address and their timestamps
+        self.requests = {}
+
+    def __call__(self, request):
+        # rate-limit POST request
+        if request.method == 'POST' and '/messages' in request.path:
+            ip = self.get_client_ip(request)
+            now = time.time()
+
+            # Get list of previous timestamp or start new
+            request_times = self.requests.get(ip, [])
+
+            # Get previous request times for the IP address or initialize a list
+            request_times = [t for t in request_times if now - t < 60]
+
+            if len(request_times) >= 5:
+                return JsonResponse({
+                    'error': 'Rate Limit Exceeded. Max 5 messages per minute.'
+                }, status=429)
+
+            # Store the updated timestamp list
+            request_times.append(now)
+            self.requests[ip] = request_times
+
+            # Proceed to next middleware
+        return self.get_response(request)
+
+    def get_client_ip(self, request):
+        # Get IP address from headers or remote address
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
