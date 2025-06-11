@@ -1,4 +1,5 @@
 from django.db.models.signals import pre_save, post_save
+from django.utils import timezone
 from django.dispatch import receiver
 from .models import Message, Notification, MessageHistory
 
@@ -23,3 +24,4 @@ def log_edit_message(sender, instance, **kwargs):
             old_content=old_message.content
         )
         instance.edited = True
+        instance.edited_at = timezone.now()
