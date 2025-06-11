@@ -1,0 +1,148 @@
+{
+    "info": {
+        "name": "Messaging App API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth - Get JWT Token",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/token/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "token",
+                        ""
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"yourpassword\"\n}"
+                }
+            }
+        },
+        {
+            "name": "Create Conversation",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{jwt_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/conversations/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "conversations",
+                        ""
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"participants\": [\n        \"1\",\n        \"2\"\n    ]\n}"
+                }
+            }
+        },
+        {
+            "name": "Send Message",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{jwt_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/messages/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "messages",
+                        ""
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"conversation\": \"1\",\n    \"sender\": \"1\",\n    \"message_body\": \"Hello from Postman!\"\n}"
+                }
+            }
+        },
+        {
+            "name": "Get Messages (with filters)",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{jwt_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/messages/?conversation=1&start_date=2025-01-01T00:00:00Z",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "messages",
+                        ""
+                    ],
+                    "query": [
+                        {
+                            "key": "conversation",
+                            "value": "1"
+                        },
+                        {
+                            "key": "start_date",
+                            "value": "2025-01-01T00:00:00Z"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Unauthorized Access Test",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/messages/",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "messages",
+                        ""
+                    ]
+                }
+            }
+        }
+    ]
+}
