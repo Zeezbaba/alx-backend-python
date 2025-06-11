@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from .models import Message, Notification
+from .models import Message, Notification, MessageHistory
 
 class MessageNotificationTestcase(TestCase):
     def setUp(self):
@@ -18,3 +18,18 @@ class MessageNotificationTestcase(TestCase):
         # Check if notification was created for darasimi
         notification = Notification.objects.filter(user=self.user2, message=message)
         self.assertTrue(notification.exists())
+
+    def test_message_edit_creates_history(self):
+        message = Message.objects.create(
+            sender=self.user1,
+            receiver=self.user2,
+            content="Original"
+        )
+
+        # Edit the message
+        message.content = "Edited"
+        message.save()
+
+        history = MessageHistory.objects.filter(message=message)
+        self.assertEqual(history.count(), 1)
+        self.assertEqual(history.first().old_content, "Original")
