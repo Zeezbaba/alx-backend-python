@@ -90,7 +90,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         message = Message.objects.create(
             conversation=conversation,
-            sender=sender,
+            sender=request.user,
             receiver=receiver,
             message_body=message_body,
             parent_message=parent_message
