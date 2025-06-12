@@ -59,13 +59,18 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Message.objects.filter(conversation__participants=self.request.user)
+        return (
+            Message.objects
+            .filter(conversation__participants=self.request.user)
+            .select_related('sender', 'conversation', 'parent_message')
+            .prefetch_related('replies'))
 
     def create(self, request, *args, **kwargs):
         # Gets required fields
         conversation_id = request.data.get('conversation')
         sender_id = request.data.get('sender')
         message_body = request.data.get('message_body')
+        parent_id = request.data.get('parent_message')
 
         if not all([conversation_id, sender_id, message_id]):
             return Response({"error": "conversation_id, sender_id, message_id are required"},
@@ -86,6 +91,7 @@ class MessageViewSet(viewsets.ModelViewSet):
             conversation=conversation,
             sender=sender,
             message_body=message_body,
+            parent_message=parent_message
         )
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -96,3 +102,14 @@ def delete_user(request):
     logout(request)
     user.delete()
     return redirect('home')
+
+def get_threaded_replies(message):
+    thread = []
+
+    def recurse(msg, depth=0):
+        thread.append((depth, msg))
+        for reply in msg.replies.all():
+            recurse(reply, depth + 1)
+
+    recurse(message)
+    return thread
