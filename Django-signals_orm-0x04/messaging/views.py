@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 from rest_framework import viewsets, status, filters
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
@@ -97,6 +98,13 @@ class MessageViewSet(viewsets.ModelViewSet):
         )
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def unread(self, request):
+        user = request.user
+        unread_messages = Message.unread.for_user(user)
+        serializer = self.get_serializer(unread_messages, many=True)
+        return Response(serializer.data)
 
 @login_required
 def delete_user(request):
