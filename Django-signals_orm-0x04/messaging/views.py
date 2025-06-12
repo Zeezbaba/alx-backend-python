@@ -68,7 +68,8 @@ class MessageViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         # Gets required fields
         conversation_id = request.data.get('conversation')
-        sender_id = request.data.get('sender')
+        sender = request.user
+        receiver_id = request.data.get('receiver')
         message_body = request.data.get('message_body')
         parent_id = request.data.get('parent_message')
 
@@ -90,6 +91,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         message = Message.objects.create(
             conversation=conversation,
             sender=sender,
+            receiver=receiver,
             message_body=message_body,
             parent_message=parent_message
         )
@@ -108,7 +110,8 @@ def get_threaded_replies(message):
 
     def recurse(msg, depth=0):
         thread.append((depth, msg))
-        for reply in msg.replies.all():
+        replies = Message.objects.filter(parent_message=msg)
+        for reply in replies:
             recurse(reply, depth + 1)
 
     recurse(message)
