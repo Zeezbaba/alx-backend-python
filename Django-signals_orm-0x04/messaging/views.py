@@ -5,6 +5,8 @@ from rest_framework import viewsets, status, filters
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from .models import User, Conversation, Message
@@ -107,6 +109,10 @@ class MessageViewSet(viewsets.ModelViewSet):
             .only('id', 'sender', 'content', 'timestamp'))
         serializer = self.get_serializer(unread_messages, many=True)
         return Response(serializer.data)
+
+    @method_decorator(cache_page(60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 @login_required
 def delete_user(request):
