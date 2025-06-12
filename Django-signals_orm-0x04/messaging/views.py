@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status, filters
+from django.contrib.auth import logout
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from .models import User, Conversation, Message
@@ -86,3 +89,10 @@ class MessageViewSet(viewsets.ModelViewSet):
         )
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@login_required
+def delete_user(request):
+    user = request.user
+    logout(request)
+    user.delete()
+    return redirect('home')

@@ -1,6 +1,7 @@
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, post_delete
 from django.utils import timezone
 from django.dispatch import receiver
+from django.contrib.auth.models import User
 from .models import Message, Notification, MessageHistory
 
 @receiver(post_save, sender=Message)
@@ -25,3 +26,9 @@ def log_edit_message(sender, instance, **kwargs):
         )
         instance.edited = True
         instance.edited_at = timezone.now()
+
+@receiver(post_delete, sender=User)
+def clear_user_data(sender, instance, **kwargs):
+    Message.objects.filter(sender=instance).delete()
+    Message.objects.filter(receiver=instance).delete()
+    Notification.objects.filter(user=instance).delete()
