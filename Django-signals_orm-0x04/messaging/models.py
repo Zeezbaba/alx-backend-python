@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager, User
 from django.conf import settings
+from .managers import UnreadMessagesManager
 
 class UserManager(BaseUserManager):
     """custom usermanager to handle user creation properly"""
@@ -74,12 +75,6 @@ class Message(models.Model):
     read = models.BooleanField(default=False)
 
     objects = models.Manager()
-
-    class UnreadMessagesManager(models.Manager):
-        def for_user(self, user):
-            return self.get_queryset().filter(receiver=user, read=False).only(
-                'id', 'sender', 'content', 'timestamp'
-            )
     unread = UnreadMessagesManager()
 
     def __str__(self):
