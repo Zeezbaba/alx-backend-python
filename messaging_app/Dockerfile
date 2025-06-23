@@ -5,10 +5,10 @@ FROM python:3.10
 WORKDIR /app
 
 # Copy requirements.txt file first
-COPY requirements.txt .
+COPY Requirements.txt .
 
 # Install dependencies
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r Requirements.txt
 
 # Copy the rest of the project code
 COPY . .

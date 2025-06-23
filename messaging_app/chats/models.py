@@ -42,7 +42,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Conversation(models.Model):
     """conversation model"""
     conversation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    participants = models.ManyToManyField(User, related_names='conversation')
+    participants = models.ManyToManyField(User, related_name='conversation')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
