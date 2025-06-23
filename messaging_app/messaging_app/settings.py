@@ -111,8 +111,12 @@ DATABASES = {
         'PASSWORD': os.getenv('MYSQL_PASSWORD'),
         'HOST': os.getenv('MYSQL_HOST'),
         'PORT': os.getenv('MYSQL_PORT'),
+        'OPTIONS': {
+            'connect_timeout': 10,  # Wait a bit longer
+        },
     }
 }
+CONN_MAX_AGE = 60
 
 AUTH_USER_MODEL = 'chats.User'
 

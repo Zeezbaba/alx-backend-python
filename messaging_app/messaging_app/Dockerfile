@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy requirements.txt file first
 COPY Requirements.txt .
 
+# Install netcat so wait-for-it.sh works
+RUN apt-get update && apt-get install -y netcat-openbsd
+
 # Install dependencies
 RUN pip install --upgrade pip && pip install -r Requirements.txt
 
