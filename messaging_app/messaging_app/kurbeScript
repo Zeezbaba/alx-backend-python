@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Exits immedietely if a command exits with a non-zero status
+set -e
+
+echo "Checking if Minikube is installed..."
+if ! command -v minikube &> /dev/null
+then
+    echo "Minikube not found, install minikube first."
+    exit 1
+fi
+
+echo "Minikube is installed."
+
+echo "Starting Minikube cluster"
+minikube start
+
+echo "Verifying the kubernetes cluster is running..."
+kubectl cluster-info
+
+echo "Getting available pods in the default namespace..."
+kubectl get pods
