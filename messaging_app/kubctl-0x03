@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo "👉 Applying updated deployment (blue -> 2.0)..."
+kubectl apply -f blue_deployment.yaml
+
+echo "📦 Rolling update in progress..."
+kubectl rollout status deployment/messaging_app
+
+echo "🌐 Testing if app stays up during update..."
+
+# Run curl in background every 2s for 30s to simulate client traffic
+for i in {1..15}
+do
+  curl -s http://<Your-Minikube-IP>:<NodePort or IngressPort>/ >> curl_output.log
+  echo "✅ Request $i sent"
+  sleep 2
+done
+
+echo "✅ Finished sending curl requests. Checking pods:"
+kubectl get pods -l app=messaging_app

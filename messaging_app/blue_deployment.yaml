@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: messaging_app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: messaging_app
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: messaging_app
-          image: zeezbabadev/messaging_app:latest  # Change this to your actual image
+          image: zeezbabadev/messaging_app:2.0
           ports:
             - containerPort: 8000
           env:
