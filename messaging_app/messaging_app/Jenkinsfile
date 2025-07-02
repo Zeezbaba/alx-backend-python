@@ -18,6 +18,12 @@ pipeline {
             }
         }
 
+        stage('Check Git Branch') {
+            steps {
+                sh 'git branch'
+            }
+        }
+
         stage('Set Up Python & Install Requirements') {
             steps {
                 // sh 'python3 -m venv venv'
