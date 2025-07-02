@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    environment {
+        VENV = 'venv'
+    }
+
+    stages {
+        stage('Clone GitHub Repo') {
+            steps {
+                git credentialsId: 'github-creds', url: 'https://github.com/Zeezbaba/alx-backend-python.git'
+            }
+        }
+
+        stage('Set Up Python & Install Requirements') {
+            steps {
+                sh 'python3 -m venv venv'
+                sh './venv/bin/pip install -r messaging_app/Requirements.txt'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh './venv/bin/pytest messaging_app/chats/tests/ --junitxml=report.xml'
+            }
+        }
+
+        stage('Achive Test Report') {
+            steps {
+                junit 'report.xml'
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Test failed! Check the report.'
+        }
+        success {
+            echo 'pipeline completed successfully!'
+        }
+    }
+}
