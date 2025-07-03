@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        dockerfile {
-            filename 'messaging_app/Dockerfile.jenkins'
-        }
-    }
+    agent any
 
     environment {
         IMAGE_NAME = 'zeezbabadev/messaging_app'
