@@ -30,13 +30,9 @@ pipeline {
 
         stage('Set Up Python & Install Requirements') {
             steps {
-                sh '''
-                    apt-get update
-                    apt-get install -y build-essential default-libmysqlclient-dev pkg-config python3-venv python3-pip
-                '''
-                // sh 'python3 -m venv venv'
-                // sh './venv/bin/pip install -r messaging_app/requirements.txt'
-                sh 'pip3 install -r messaging_app/Requirements.txt'
+                sh 'python3 -m venv venv'
+                sh './venv/bin/pip3 install -r messaging_app/Requirements.txt'
+                // sh 'pip3 install -r messaging_app/Requirements.txt'
             }
         }
 
