@@ -1,21 +1,38 @@
 pipeline {
-    agent any
+    agent {
+        dockerfile {
+            filename 'messaging_app/Dockerfile.jenkins'
+        }
+    }
 
     environment {
-        VENV = 'venv'
+        IMAGE_NAME = 'zeezbabadev/messaging_app'
     }
 
     stages {
         stage('Clone GitHub Repo') {
             steps {
-                git credentialsId: 'github-creds', url: 'https://github.com/Zeezbaba/alx-backend-python.git'
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/master']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/Zeezbaba/alx-backend-python.git',
+                        credentialsId: 'github-creds'
+                    ]]
+                ]) 
+            }
+        }
+
+        stage('Check Git Branch') {
+            steps {
+                sh 'git branch'
             }
         }
 
         stage('Set Up Python & Install Requirements') {
             steps {
                 sh 'python3 -m venv venv'
-                sh './venv/bin/pip install -r messaging_app/Requirements.txt'
+                sh './venv/bin/pip install -r messaging_app/requirements.txt'
+                // sh 'pip3 install -r messaging_app/Requirements.txt'
             }
         }
 
@@ -28,6 +45,27 @@ pipeline {
         stage('Achive Test Report') {
             steps {
                 junit 'report.xml'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t $IMAGE_NAME:latest messaging_app'
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker push $IMAGE_NAME:latest
+                        '''
+                    }
+                }
             }
         }
     }
